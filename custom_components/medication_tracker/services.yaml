@@ -106,7 +106,8 @@ add_medication:
       default: 1
       selector:
         number:
-          min: 1
+          min: 0.1
+          step: 0.1
           mode: box
     refill_reminder_threshold:
       name: Refill Reminder Threshold
@@ -214,7 +215,8 @@ update_medication:
       required: false
       selector:
         number:
-          min: 1
+          min: 0.1
+          step: 0.1
           mode: box
     refill_reminder_threshold:
       name: Refill Reminder Threshold

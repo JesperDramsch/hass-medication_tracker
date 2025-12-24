@@ -1657,10 +1657,11 @@ class MedicationTrackerPanel extends LitElement {
                       <input
                         class="form-input"
                         type="number"
-                        min="1"
+                        min="0.1"
+                        step="any"
                         .value=${this._newMedication.pills_per_dose}
                         @input=${(e) =>
-              this._updateNewMedication("pills_per_dose", parseInt(e.target.value) || 1)}
+              this._updateNewMedication("pills_per_dose", parseFloat(e.target.value) || 1)}
                       />
                     </div>
 
@@ -1864,10 +1865,11 @@ class MedicationTrackerPanel extends LitElement {
                       <input
                         class="form-input"
                         type="number"
-                        min="1"
+                        min="0.1"
+                        step="any"
                         .value=${this._editMedication.pills_per_dose}
                         @input=${(e) =>
-              this._updateEditMedication("pills_per_dose", parseInt(e.target.value) || 1)}
+              this._updateEditMedication("pills_per_dose", parseFloat(e.target.value) || 1)}
                       />
                     </div>
 

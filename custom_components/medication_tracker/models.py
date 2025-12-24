@@ -37,7 +37,7 @@ class MedicationData:
     # Supply tracking fields
     supply_tracking_enabled: bool = False
     current_supply: int | None = None
-    pills_per_dose: int = 1
+    pills_per_dose: float = 1.0
     refill_reminder_threshold: int = 7  # days worth of supply before alerting
     last_refill_date: date | datetime | None = None
     show_refill_on_calendar: bool = False
