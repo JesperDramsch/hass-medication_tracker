@@ -333,4 +333,7 @@ class MedicationSupplySensor(CoordinatorEntity, SensorEntity):
         if medication.data.last_refill_date:
             attributes["last_refill_date"] = medication.data.last_refill_date.isoformat()
 
+        attributes["refill_threshold_days"] = medication.data.refill_reminder_threshold
+        attributes["show_refill_on_calendar"] = medication.data.show_refill_on_calendar
+
         return attributes

@@ -284,7 +284,7 @@ class MedicationCoordinator(DataUpdateCoordinator[dict[str, Any]]):
     async def async_refill_medication(
         self,
         medication_id: str,
-        refill_amount: int,
+        refill_amount: float,
         refill_date: datetime | None = None,
     ) -> bool:
         """Refill medication supply."""

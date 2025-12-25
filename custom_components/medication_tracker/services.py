@@ -78,8 +78,8 @@ ADD_MEDICATION_SCHEMA = vol.Schema(
         vol.Optional(CONF_NOTES, default=""): cv.string,
         # Supply tracking fields
         vol.Optional(CONF_SUPPLY_TRACKING_ENABLED, default=False): cv.boolean,
-        vol.Optional(CONF_CURRENT_SUPPLY): cv.positive_int,
-        vol.Optional(CONF_PILLS_PER_DOSE, default=1): cv.positive_int,
+        vol.Optional(CONF_CURRENT_SUPPLY): vol.Coerce(float),
+        vol.Optional(CONF_PILLS_PER_DOSE, default=1.0): vol.Coerce(float),
         vol.Optional(CONF_REFILL_REMINDER_THRESHOLD, default=7): cv.positive_int,
         vol.Optional(CONF_SHOW_REFILL_ON_CALENDAR, default=False): cv.boolean,
     }
@@ -110,8 +110,8 @@ UPDATE_MEDICATION_SCHEMA = vol.Schema(
         vol.Optional(CONF_NOTES): cv.string,
         # Supply tracking fields
         vol.Optional(CONF_SUPPLY_TRACKING_ENABLED): cv.boolean,
-        vol.Optional(CONF_CURRENT_SUPPLY): cv.positive_int,
-        vol.Optional(CONF_PILLS_PER_DOSE): cv.positive_int,
+        vol.Optional(CONF_CURRENT_SUPPLY): vol.Coerce(float),
+        vol.Optional(CONF_PILLS_PER_DOSE): vol.Coerce(float),
         vol.Optional(CONF_REFILL_REMINDER_THRESHOLD): cv.positive_int,
         vol.Optional(CONF_SHOW_REFILL_ON_CALENDAR): cv.boolean,
     }
@@ -120,7 +120,7 @@ UPDATE_MEDICATION_SCHEMA = vol.Schema(
 REFILL_MEDICATION_SCHEMA = vol.Schema(
     {
         vol.Required(ATTR_MEDICATION_ID): cv.string,
-        vol.Required(ATTR_REFILL_AMOUNT): cv.positive_int,
+        vol.Required(ATTR_REFILL_AMOUNT): vol.Coerce(float),
         vol.Optional(ATTR_DATETIME): cv.datetime,
     }
 )
@@ -128,7 +128,7 @@ REFILL_MEDICATION_SCHEMA = vol.Schema(
 UPDATE_SUPPLY_SCHEMA = vol.Schema(
     {
         vol.Required(ATTR_MEDICATION_ID): cv.string,
-        vol.Required(ATTR_CURRENT_SUPPLY): cv.positive_int,
+        vol.Required(ATTR_CURRENT_SUPPLY): vol.Coerce(float),
     }
 )
 

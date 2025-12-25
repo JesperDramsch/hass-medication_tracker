@@ -202,6 +202,9 @@ class MedicationLowSupplySensor(CoordinatorEntity, BinarySensorEntity):
             attributes[ATTR_REFILL_THRESHOLD_DAYS] = (
                 medication.data.refill_reminder_threshold
             )
+            attributes["show_refill_on_calendar"] = (
+                medication.data.show_refill_on_calendar
+            )
 
             days_remaining = medication.days_of_supply_remaining
             if days_remaining is not None:

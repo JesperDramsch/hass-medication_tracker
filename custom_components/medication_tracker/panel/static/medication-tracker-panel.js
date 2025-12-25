@@ -890,6 +890,8 @@ class MedicationTrackerPanel extends LitElement {
             supply_tracking_enabled: supplySensor && supplySensor.state !== "unavailable" && supplySensor.state !== "unknown",
             current_supply: supplySensor?.state !== "unavailable" && supplySensor?.state !== "unknown" ? supplySensor?.state : null,
             pills_per_dose: supplySensor?.attributes?.pills_per_dose || 1,
+            refill_reminder_threshold: supplySensor?.attributes?.refill_threshold_days || 7,
+            show_refill_on_calendar: supplySensor?.attributes?.show_refill_on_calendar || false,
             days_remaining: supplySensor?.attributes?.days_remaining,
             estimated_refill_date: supplySensor?.attributes?.estimated_refill_date,
             low_supply: lowSupplySensor?.state === "on",
@@ -1035,9 +1037,9 @@ class MedicationTrackerPanel extends LitElement {
       data.supply_tracking_enabled = this._newMedication.supply_tracking_enabled;
       if (this._newMedication.supply_tracking_enabled) {
         if (this._newMedication.current_supply !== "" && this._newMedication.current_supply !== null) {
-          data.current_supply = parseInt(this._newMedication.current_supply);
+          data.current_supply = parseFloat(this._newMedication.current_supply);
         }
-        data.pills_per_dose = parseInt(this._newMedication.pills_per_dose) || 1;
+        data.pills_per_dose = parseFloat(this._newMedication.pills_per_dose) || 1;
         data.refill_reminder_threshold = parseInt(this._newMedication.refill_reminder_threshold) || 7;
         data.show_refill_on_calendar = this._newMedication.show_refill_on_calendar;
       }
@@ -1069,8 +1071,8 @@ class MedicationTrackerPanel extends LitElement {
       supply_tracking_enabled: medication.supply_tracking_enabled || false,
       current_supply: medication.current_supply || "",
       pills_per_dose: medication.pills_per_dose || 1,
-      refill_reminder_threshold: 7, // Default since this isn't exposed in the sensor
-      show_refill_on_calendar: false, // Default since this isn't exposed in the sensor
+      refill_reminder_threshold: medication.refill_reminder_threshold || 7,
+      show_refill_on_calendar: medication.show_refill_on_calendar || false,
     };
     this._showEditDialog = true;
   }
@@ -1153,9 +1155,9 @@ class MedicationTrackerPanel extends LitElement {
       data.supply_tracking_enabled = this._editMedication.supply_tracking_enabled;
       if (this._editMedication.supply_tracking_enabled) {
         if (this._editMedication.current_supply !== "" && this._editMedication.current_supply !== null) {
-          data.current_supply = parseInt(this._editMedication.current_supply);
+          data.current_supply = parseFloat(this._editMedication.current_supply);
         }
-        data.pills_per_dose = parseInt(this._editMedication.pills_per_dose) || 1;
+        data.pills_per_dose = parseFloat(this._editMedication.pills_per_dose) || 1;
         data.refill_reminder_threshold = parseInt(this._editMedication.refill_reminder_threshold) || 7;
         data.show_refill_on_calendar = this._editMedication.show_refill_on_calendar;
       }
@@ -1185,7 +1187,7 @@ class MedicationTrackerPanel extends LitElement {
     try {
       await this.hass.callService("medication_tracker", "refill_medication", {
         medication_id: this._refillMedicationId,
-        refill_amount: parseInt(this._refillAmount),
+        refill_amount: parseFloat(this._refillAmount),
       });
       this._hideRefillDialog();
       // Event subscription will automatically update the UI
@@ -1207,6 +1209,13 @@ class MedicationTrackerPanel extends LitElement {
 
   _getStatusClass(status) {
     return `medication-status status-${status.replace("_", "-")}`;
+  }
+
+  _formatNumber(value) {
+    if (value == null) return '0';
+    const num = Number(value);
+    if (isNaN(num)) return '0';
+    return Number.isInteger(num) ? num : num.toFixed(1);
   }
 
   _formatDate(dateString) {
@@ -1298,9 +1307,9 @@ class MedicationTrackerPanel extends LitElement {
                 ${sortedMedications.map(med => html`
                   <tr>
                     <td><strong>${med.name}</strong></td>
-                    <td>${med.current_supply || 0} units</td>
+                    <td>${this._formatNumber(med.current_supply)} units</td>
                     <td class="${med.low_supply ? 'supply-status-low' : ''}">
-                      ${med.days_remaining ? med.days_remaining.toFixed(1) : '—'}
+                      ${med.days_remaining != null ? this._formatNumber(med.days_remaining) : '—'}
                     </td>
                     <td>${med.estimated_refill_date ? this._formatDate(med.estimated_refill_date) : '—'}</td>
                     <td>
@@ -1424,11 +1433,11 @@ class MedicationTrackerPanel extends LitElement {
                         <div class="supply-section">
                           <div class="medication-detail">
                             <span class="detail-label">Current Supply:</span>
-                            <span class="detail-value ${med.low_supply ? 'low-supply-value' : ''}">${med.current_supply || 0} units</span>
+                            <span class="detail-value ${med.low_supply ? 'low-supply-value' : ''}">${this._formatNumber(med.current_supply)} units</span>
                           </div>
                           <div class="medication-detail">
                             <span class="detail-label">Days Remaining:</span>
-                            <span class="detail-value">${med.days_remaining ? med.days_remaining.toFixed(1) : '—'}</span>
+                            <span class="detail-value">${med.days_remaining != null ? this._formatNumber(med.days_remaining) : '—'}</span>
                           </div>
                           ${med.estimated_refill_date
                     ? html`
@@ -1646,6 +1655,7 @@ class MedicationTrackerPanel extends LitElement {
                         class="form-input"
                         type="number"
                         min="0"
+                        step="0.5"
                         .value=${this._newMedication.current_supply}
                         @input=${(e) =>
               this._updateNewMedication("current_supply", e.target.value)}
@@ -1657,8 +1667,8 @@ class MedicationTrackerPanel extends LitElement {
                       <input
                         class="form-input"
                         type="number"
-                        min="0.1"
-                        step="any"
+                        min="0.5"
+                        step="0.5"
                         .value=${this._newMedication.pills_per_dose}
                         @input=${(e) =>
               this._updateNewMedication("pills_per_dose", parseFloat(e.target.value) || 1)}
@@ -1854,6 +1864,7 @@ class MedicationTrackerPanel extends LitElement {
                         class="form-input"
                         type="number"
                         min="0"
+                        step="0.5"
                         .value=${this._editMedication.current_supply}
                         @input=${(e) =>
               this._updateEditMedication("current_supply", e.target.value)}
@@ -1865,8 +1876,8 @@ class MedicationTrackerPanel extends LitElement {
                       <input
                         class="form-input"
                         type="number"
-                        min="0.1"
-                        step="any"
+                        min="0.5"
+                        step="0.5"
                         .value=${this._editMedication.pills_per_dose}
                         @input=${(e) =>
               this._updateEditMedication("pills_per_dose", parseFloat(e.target.value) || 1)}
@@ -1942,9 +1953,10 @@ class MedicationTrackerPanel extends LitElement {
                   <input
                     class="form-input"
                     type="number"
-                    min="1"
+                    min="0.5"
+                    step="0.5"
                     .value=${this._refillAmount}
-                    @input=${(e) => this._refillAmount = parseInt(e.target.value) || 30}
+                    @input=${(e) => this._refillAmount = parseFloat(e.target.value) || 30}
                   />
                 </div>
 
